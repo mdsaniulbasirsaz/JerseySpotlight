@@ -3,21 +3,21 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
+app.use(express.json());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-// mongoose.connect(process.env.MONGO_URI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-//   .then(() => console.log('MongoDB connected!'))
-//   .catch(err => console.log('MongoDB connection error:', err));
+mongoose.connect(process.env.MONGO_URI, {
+    
+  })
+  .then(() => console.log('MongoDB connected!'))
+  .catch(err => console.log('MongoDB connection error:', err));
 
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -49,6 +49,82 @@ app.get('/login', (req, res) => {
 app.get('/signup', (req, res) => {
     res.sendFile(__dirname + '/public/signup.html');
 });
+
+
+
+
+
+//Define USer Schema
+const userSchema = new mongoose.Schema({
+  username : String,
+  name : String,
+  email : String,
+  phone : String,
+  password : String
+});
+const User = mongoose.model('User', userSchema);
+module.exports = User;
+
+app.post('/users', async (req, res) => {
+  try {
+      const user = new User(req.body);
+      await user.save();
+      res.status(201).send(user);
+  } catch (error) {
+      res.status(400).send(error);
+  }
+});
+app.get('/users/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+//Login
+
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (password !== user.password) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    res.status(200).json({ message: 'Login successful', user });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 
   app.listen(port, () => {
     console.log(`Server running on port http://localhost:${port}`);
