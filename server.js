@@ -116,8 +116,41 @@ app.post('/login', async (req, res) => {
 });
 
 
+//Product
+const productSchema = new mongoose.Schema({
+  username: String,
+  productName : String,
+  price : String,
+  image : String
+});
+const Product = mongoose.model('Product', productSchema);
+module.exports = Product;
 
+app.post('/addcart', async(req,res) =>{
+  try{
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).send(product);
+  }
+  catch(error){
+    res.status(400).send(error);
+  }
+});
 
+app.get('/cartDetails/:username', async(req,res) =>{
+  try{
+  const username = req.params.username;
+  const product = await Product.findOne({username:username});
+  if(!product)
+  {
+    return res.status(404).json({message: 'Cart Details cannot found'});
+  }
+  res.status(200).json(product);
+}
+catch(error){
+  res.status(500).json({message: 'Server error'});
+  }
+});
 
 
 
