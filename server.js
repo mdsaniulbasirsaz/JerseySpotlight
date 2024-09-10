@@ -34,6 +34,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use(express.static('public'));
 app.use(express.static('images'));
 app.use(express.static('styles'));
+app.use(express.static('src'));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
