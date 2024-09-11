@@ -117,7 +117,7 @@ app.post('/login', async (req, res) => {
 });
 
 
-//Product
+//Productbooking
 const productSchema = new mongoose.Schema({
   username: String,
   productName : String,
@@ -152,6 +152,40 @@ catch(error){
   res.status(500).json({message: 'Server error'});
   }
 });
+
+//Add Product
+const addProductSchema = new mongoose.Schema({
+  productName : String,
+  image: String,
+  price: String
+});
+const AddProduct = mongoose.model('AddProduct', addProductSchema);
+module.exports = AddProduct;
+
+app.post('/addProduct',async(req,res) =>{
+  try{
+    const addProduct = new AddProduct(req.body);
+    await addProduct.save();
+    res.status(201).send(addProduct);
+  }
+  catch(error){
+    res.status(400).send(error);
+  }
+});
+
+app.get('/getProducts', async (req, res) => {
+  try {
+    const products = await AddProduct.find(); 
+    res.status(200).send(products); 
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+
+
+
+
 
 
 
